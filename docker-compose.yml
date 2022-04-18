@@ -3,5 +3,8 @@ services:
   app:
     build: .
     tty: true
+    stdin_open: true
     volumes:
       - ./app:/go/src/app
+    ports:
+      - "3000:8080"
