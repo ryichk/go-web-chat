@@ -1,5 +1,11 @@
 package main
 
+import (
+	"github.com/gorilla/websocket"
+	"log"
+	"net/http"
+)
+
 type room struct {
 	// forwardは他のクライアントに転送するメッセージを保持するチャネル
 	forward chan []byte
@@ -41,23 +47,25 @@ func (r *room) run() {
 }
 
 const (
-	socketBufferSize = 1024
+	socketBufferSize  = 1024
 	messageBufferSize = 256
 )
+
 // WebSocketを利用するためにwebsocket.Upgrader型を使ってHTTP接続をアップグレードする必要がある
-var upgrader = &websocket.Upgrader(ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize)
+var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: socketBufferSize}
+
 // *room型をhttp.Handler型に適合
 func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// WebSocketコネクションを取得
-	socket, err := upgrader.Upgrader(w, req, nil)
+	socket, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		log.Fatal("ServeHTTP:", err)
 		return
 	}
-	client := &client {
+	client := &client{
 		socket: socket,
-		send: make(chan []byte, messageBufferSize),
-		room: r,
+		send:   make(chan []byte, messageBufferSize),
+		room:   r,
 	}
 	// クライアント入室
 	r.join <- client
@@ -68,10 +76,10 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func newRoom() *room {
-	return &room {
+	return &room{
 		forward: make(chan []byte),
-		join: make(chan *client),
-		leave: make(chan *client),
+		join:    make(chan *client),
+		leave:   make(chan *client),
 		clients: make(map[*client]bool),
 	}
 }
