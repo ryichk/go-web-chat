@@ -5,6 +5,6 @@ services:
     tty: true
     stdin_open: true
     volumes:
-      - ./app:/go/src/app
+      - ./:/go/src
     ports:
       - "3000:8080"
