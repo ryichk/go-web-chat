@@ -12,7 +12,8 @@ import (
 type templateHandler struct {
 	once     sync.Once
 	filename string
-	templ    *template.Template
+	// ポインタ変数(アドレスが入る)
+	templ *template.Template
 }
 
 // ServeHTTP handles HTTP requests
@@ -24,8 +25,11 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	r := newRoom()
 	// route
 	http.Handle("/", &templateHandler{filename: "chat.html"})
+	http.Handle("/room", r)
+	go r.run()
 	// start web server
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServer:", err)
