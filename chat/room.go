@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
+	"go-web-chat/trace"
 	"log"
 	"net/http"
 )
@@ -19,6 +20,8 @@ type room struct {
 	// チャネルを使わずにマップclientsを直接操作することは望ましくない
 	// 複数のgoroutineがマップを同時に変更する可能性があり、メモリ破壊など予期せぬ状態になりうる
 	clients map[*client]bool
+	// tracerはチャットルーム上で行われた操作のログを受け取る
+	tracer trace.Tracer
 }
 
 func (r *room) run() {
@@ -28,18 +31,23 @@ func (r *room) run() {
 		//case節のコードが同時に実行されることはない
 		case client := <-r.join:
 			r.clients[client] = true
+			r.tracer.Trace("A new client has joined.")
 		case client := <-r.leave:
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("The client has left.")
 		case msg := <-r.forward:
+			r.tracer.Trace("Received a message: ", string(msg))
 			// 全てのクライアントにメッセージを転送
 			for client := range r.clients {
 				select {
 				case client.send <- msg:
 					// メッセージ送信
+					r.tracer.Trace(" -- Sent to client")
 				default:
 					delete(r.clients, client)
 					close(client.send)
+					r.tracer.Trace(" -- Failed to send. Clean up the client.")
 				}
 			}
 		}
