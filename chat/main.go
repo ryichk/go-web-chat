@@ -2,6 +2,9 @@ package main
 
 import (
 	"flag"
+	"github.com/joho/godotenv"
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/google"
 	"go-web-chat/trace"
 	"log"
 	"net/http"
@@ -33,6 +36,15 @@ func main() {
 	// フラグを解釈する
 	// コマンドラインで指定された文字列から*addrに情報をセット
 	flag.Parse()
+
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Println(".envを読み込めませんでした: %v", err)
+	}
+	// Gomniauthのセットアップ
+	gomniauth.SetSecurityKey(os.Getenv("GOMNIAUTH_SECURITY_KEY"))
+	gomniauth.WithProviders(
+		google.New(os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_API_KEY"), "http://localhost:3000/auth/callback/google"),
+	)
 
 	r := newRoom()
 	r.tracer = trace.New(os.Stdout)

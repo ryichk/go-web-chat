@@ -1,0 +1,6 @@
+.DS_Store
+
+# compile
+chat/chat
+
+.env
