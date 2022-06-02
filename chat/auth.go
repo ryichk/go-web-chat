@@ -15,7 +15,7 @@ type authHandler struct {
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// authというCookieの有無をチェック
-	if _, err := r.Cookie("auth"); err == http.ErrNoCookie {
+	if cookie, err := r.Cookie("auth"); err == http.ErrNoCookie || cookie.Value == "" {
 		// 未認証の場合、ログインページにリダイレクト
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusTemporaryRedirect)
@@ -81,4 +81,15 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "アクション%sには非対応です", action)
 	}
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   "auth",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	w.Header()["Location"] = []string{"/chat"}
+	w.WriteHeader(http.StatusTemporaryRedirect)
 }

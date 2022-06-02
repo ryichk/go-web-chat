@@ -61,6 +61,7 @@ func main() {
 	http.Handle("/login", &templateHandler{filename: "login.html"})
 	// http.Handlerインタフェースを実装していないハンドラもパスの関連付けを行える
 	http.HandleFunc("/auth/", loginHandler)
+	http.HandleFunc("/logout", logoutHandler)
 	http.Handle("/room", r)
 	go r.run()
 	// start web server
