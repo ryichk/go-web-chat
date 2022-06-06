@@ -1,6 +1,6 @@
 .DS_Store
 
 # compile
-chat/chat
+main/main
 
 .env
