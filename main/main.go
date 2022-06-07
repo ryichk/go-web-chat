@@ -55,7 +55,7 @@ func main() {
 		google.New(os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_API_KEY"), "http://localhost:3000/auth/callback/google"),
 	)
 
-	r := newRoom(UseAuthAvatar)
+	r := newRoom(UseGravatar)
 	r.tracer = trace.New(os.Stdout)
 	// route
 	http.Handle("/chat", auth.MustAuth(&templateHandler{filename: "chat.html"}))

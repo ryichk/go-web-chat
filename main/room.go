@@ -100,7 +100,7 @@ func newRoom(avatar Avatar) *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
-		avatar: avatar,
+		avatar:  avatar,
 		tracer:  trace.Off(),
 	}
 }
