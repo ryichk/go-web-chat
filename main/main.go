@@ -65,6 +65,9 @@ func main() {
 	http.HandleFunc("/logout", auth.LogoutHandler)
 	http.Handle("/room", r)
 	go r.run()
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+	http.HandleFunc("/uploader", uploaderHandler)
+
 	// start web server
 	log.Println("webサーバを開始します。ポート: ", *addr)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
