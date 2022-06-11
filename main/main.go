@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/google"
 	"github.com/stretchr/objx"
-	"go-web-chat/auth"
 	"go-web-chat/trace"
 	"log"
 	"net/http"
@@ -58,11 +57,11 @@ func main() {
 	r := newRoom(UseFileSystemAvatar)
 	r.tracer = trace.New(os.Stdout)
 	// route
-	http.Handle("/chat", auth.MustAuth(&templateHandler{filename: "chat.html"}))
+	http.Handle("/chat", mustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/login", &templateHandler{filename: "login.html"})
 	// http.Handlerインタフェースを実装していないハンドラもパスの関連付けを行える
-	http.HandleFunc("/auth/", auth.LoginHandler)
-	http.HandleFunc("/logout", auth.LogoutHandler)
+	http.HandleFunc("/auth/", loginHandler)
+	http.HandleFunc("/logout", logoutHandler)
 	http.Handle("/room", r)
 	go r.run()
 	http.Handle("/upload", &templateHandler{filename: "upload.html"})

@@ -1,15 +1,30 @@
-package auth
+package main
 
 import (
 	"crypto/md5"
 	"fmt"
 	"github.com/stretchr/gomniauth"
+	gomniauthcommon "github.com/stretchr/gomniauth/common"
 	"github.com/stretchr/objx"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 )
+
+type ChatUser interface {
+	UniqueID() string
+	AvatarURL() string
+}
+
+type chatUser struct {
+	gomniauthcommon.User
+	uniqueID string
+}
+
+func (u chatUser) UniqueID() string {
+	return u.uniqueID
+}
 
 type authHandler struct {
 	next http.Handler
@@ -30,13 +45,13 @@ func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func MustAuth(handler http.Handler) http.Handler {
+func mustAuth(handler http.Handler) http.Handler {
 	return &authHandler{next: handler}
 }
 
 // サードパーティへのログイン処理を受け持つ
 // パスの形式: /auth/{action}/{provider}
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func loginHandler(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.Path, "/")
 	action := segs[2]
 	provider := segs[3]
@@ -90,7 +105,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:   "auth",
 		Value:  "",
