@@ -15,6 +15,13 @@ import (
 	"text/template"
 )
 
+// 現在アクティブなAvatarの実装
+var avatars Avatar = TryAvatars{
+	UseFileSystemAvatar,
+	UseAuthAvatar,
+	UseGravatar,
+}
+
 // templ is a template
 type templateHandler struct {
 	once     sync.Once
@@ -54,7 +61,7 @@ func main() {
 		google.New(os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_API_KEY"), "http://localhost:3000/auth/callback/google"),
 	)
 
-	r := newRoom(UseFileSystemAvatar)
+	r := newRoom()
 	r.tracer = trace.New(os.Stdout)
 	// route
 	http.Handle("/chat", mustAuth(&templateHandler{filename: "chat.html"}))

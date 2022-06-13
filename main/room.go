@@ -21,8 +21,6 @@ type room struct {
 	// チャネルを使わずにマップclientsを直接操作することは望ましくない
 	// 複数のgoroutineがマップを同時に変更する可能性があり、メモリ破壊など予期せぬ状態になりうる
 	clients map[*client]bool
-	// アバターの情報を取得する
-	avatar Avatar
 	// tracerはチャットルーム上で行われた操作のログを受け取る
 	tracer trace.Tracer
 }
@@ -94,13 +92,12 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	client.read()
 }
 
-func newRoom(avatar Avatar) *room {
+func newRoom() *room {
 	return &room{
 		forward: make(chan *message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
-		avatar:  avatar,
 		tracer:  trace.Off(),
 	}
 }
