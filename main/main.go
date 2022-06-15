@@ -55,7 +55,7 @@ func main() {
 		google.New(os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_API_KEY"), "http://localhost:3000/auth/callback/google"),
 	)
 
-	r := newRoom(UseGravatar)
+	r := newRoom(UseFileSystemAvatar)
 	r.tracer = trace.New(os.Stdout)
 	// route
 	http.Handle("/chat", auth.MustAuth(&templateHandler{filename: "chat.html"}))
@@ -67,6 +67,11 @@ func main() {
 	go r.run()
 	http.Handle("/upload", &templateHandler{filename: "upload.html"})
 	http.HandleFunc("/uploader", uploaderHandler)
+	http.Handle("/avatars/",
+		http.StripPrefix("/avatars/",
+			http.FileServer(http.Dir("./avatars")),
+		),
+	)
 
 	// start web server
 	log.Println("webサーバを開始します。ポート: ", *addr)
